@@ -50,22 +50,10 @@ def kitti_visualization(dataset: SceneDataset, class_list, vis_num, thres = None
     # https://stackoverflow.com/questions/1409886/help-maximum-number-of-clients-reached-segmentation-fault
     # vi = build_viewer(offscreen=offscreen) # MJ inside for loop -> max client
     for idx in pbar:
+        vi = build_viewer(offscreen=offscreen) #### TMP
+
         data = dataset[idx]
         points = data['points']
-
-        # MJ
-        save_frame_id = dataset.frame_id # frame number extract
-        print("save frame id {}".format(save_frame_id))
-        
-
-        open_numbers = [3315, 3318, 3320, 3331, 3336, 3373, 3396, 3406, 3407, 3408]
-        # open_numbers = [3320]
-        # Convert to 6-digit strings
-        opensetsix_digit_strings = [str(num).zfill(6) for num in open_numbers]
-        if save_frame_id not in opensetsix_digit_strings:
-            continue
-
-        vi = build_viewer(offscreen=offscreen) #### TMP
 
 
         vi.add_points(points[:,0:3],
@@ -89,7 +77,7 @@ def kitti_visualization(dataset: SceneDataset, class_list, vis_num, thres = None
 
             # add pred_boxes
             vi.add_3D_boxes(boxes=boxes[:,0:7],
-                            # box_info=box_info, # no name
+                            box_info=box_info,
                             color="green",
                             mesh_alpha = 0.1,  # 表面透明度
                             show_corner_spheres = True,    # 是否展示顶点上的球
@@ -108,7 +96,7 @@ def kitti_visualization(dataset: SceneDataset, class_list, vis_num, thres = None
             # add gt_boxes
             vi.add_3D_boxes(gt_boxes,
                             color='red',
-                            # box_info=gt_name, # MJ no name
+                            box_info=gt_name,
                             caption_size=(0.1,0.1),
                             is_label=True
                             )
@@ -137,12 +125,19 @@ def kitti_visualization(dataset: SceneDataset, class_list, vis_num, thres = None
         vi.show_3D(save_name=save_name)
         """
 
+        # MJ
+        save_frame_id = dataset.frame_id # frame number extract
+        print("save frame id {}".format(save_frame_id))
+
+        open_numbers = [3315, 3318, 3320, 3331, 3336, 3373, 3396, 3406, 3407, 3408]
+        # Convert to 6-digit strings
+        opensetsix_digit_strings = [str(num).zfill(6) for num in open_numbers]
 
 
-        if save_frame_id is not None:
-        # if save_frame_id is not None and save_frame_id in opensetsix_digit_strings:
-            save_name = os.path.join(save_img_path,f'{save_frame_id}.png')  if save_path is not None else None
-            vi.show_2D(save_name=save_name) # MJ
+        # if save_frame_id is not None:
+        if save_frame_id is not None and save_frame_id in opensetsix_digit_strings:
+            # save_name = os.path.join(save_img_path,f'{save_frame_id}.png')  if save_path is not None else None
+            # vi.show_2D(save_name=save_name) # MJ
             save_name = os.path.join(save_velo_path,f'{save_frame_id}.png') if save_path is not None else None
             vi.show_3D(save_name=save_name)
 
@@ -199,7 +194,7 @@ if __name__ == '__main__':
     # kitti scene script
 
     data_root = Path('data_root')
-    ALL_ITER = True # True -> auto saving in output folder
+    ALL_ITER = False # True -> auto saving in output folder
     VAL_DATA = False # False -> test data
 
     # ----------------------
@@ -217,22 +212,20 @@ if __name__ == '__main__':
     # method = "pointrcnn"
     # ----------------------
 
-    methods = [
-            "second",
-            "CLOCs", 
-            "voxel_rcnn", 
-            "focal_conv_f", 
-            "pointpainting", 
-            "pointpillars", 
-            "pv_rcnn", 
-            "pointrcnn"
+    methods = ["CLOCs", 
+            #    "voxel_rcnn", 
+            #    "focal_conv_f", 
+            #    "pointpainting", 
+            #    "pointpillars", 
+            #    "pv_rcnn", 
+            #    "pointrcnn"
                ]
     
 
     for method in methods:
 
         # output_folder = os.path.join("output", method) if ALL_ITER else None
-        output_folder = os.path.join("output_final_test", method) if ALL_ITER else None
+        output_folder = os.path.join("output_final", method) if ALL_ITER else None
         if output_folder is not None:
             output_folder = os.path.join(output_folder, "val-data") if VAL_DATA else os.path.join(output_folder, "test-data")
         # ----------------------
@@ -255,5 +248,5 @@ if __name__ == '__main__':
         kitti_visualization(dataset, 
                     class_list,
                     vis_num=100, 
-                    thres = 0.2, save_path=output_folder, all_iter=ALL_ITER)
+                    thres = 0.49, save_path=output_folder, all_iter=ALL_ITER)
 

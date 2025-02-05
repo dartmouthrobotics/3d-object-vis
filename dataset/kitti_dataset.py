@@ -23,7 +23,8 @@ class KittiDetectionDataset:
         name = str(item).zfill(6)
 
         velo_path = os.path.join(self.velo_path,name+'.bin')
-        image_path = os.path.join(self.image_path, name+'.png')
+        # image_path = os.path.join(self.image_path, name+'.png')
+        image_path = os.path.join(self.image_path, name+'.jpg') # MJ
         calib_path = os.path.join(self.calib_path, name+'.txt')
         label_path = os.path.join(self.label_path, name+".txt")
 
@@ -63,8 +64,8 @@ class KittiTrackingDataset:
         name = str(item).zfill(6)
 
         velo_path = os.path.join(self.velo_path,name+'.bin')
-        image_path = os.path.join(self.image_path, name+'.png')
-
+        # image_path = os.path.join(self.image_path, name+'.png')
+        image_path = os.path.join(self.image_path, name+'.jpg') # MJ
 
 
         points = read_velodyne(velo_path,self.P2,self.V2C)

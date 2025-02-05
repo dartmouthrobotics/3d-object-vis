@@ -2,18 +2,15 @@ from viewer.viewer import Viewer
 from scenedataset import SceneDataset
 from tqdm import tqdm
 from utils import *
-import os
 
-# def build_viewer(box_type="OpenPCDet", bg=(255,255,255), offscreen=False, remote=False):
 def build_viewer(box_type="OpenPCDet", bg=(255,255,255), offscreen=False, remote=False):
-
     # in case you are working on a remote machine, specify DISPLAY value like this
     # checkout https://github.com/marcomusy/vedo/issues/64  
     if remote: os.environ['DISPLAY'] = ':99.0'
     return Viewer(box_type=box_type, bg=bg, offscreen=offscreen)
 
 def kitti_visualization(dataset: SceneDataset, class_list, vis_num, thres = None, 
-                        save_path: Path=None, all_iter=False):
+                        save_path: Path=None):
     """
     Draw kitti scene and inference results
     Args:
@@ -27,45 +24,20 @@ def kitti_visualization(dataset: SceneDataset, class_list, vis_num, thres = None
     offscreen = False
     if save_path is not None:
         offscreen = True
-        # save_img_path = save_path / 'img'
-        # save_velo_path = save_path / 'velo'
-        save_img_path = os.path.join(save_path,'img') # MJ
-        save_velo_path = os.path.join(save_path,'velo') # MJ
+        save_img_path = save_path / 'img'
+        save_velo_path = save_path / 'velo'
 
-        os.makedirs(save_path, exist_ok=True)
-        os.makedirs(save_img_path, exist_ok=True)
-        os.makedirs(save_velo_path, exist_ok=True)
+        save_path.mkdir(parents=True, exist_ok=True)
+        save_img_path.mkdir(parents=True, exist_ok=True)
+        save_velo_path.mkdir(parents=True, exist_ok=True)
 
-        # save_path.mkdir(parents=True, exist_ok=True)
-        # save_img_path.mkdir(parents=True, exist_ok=True)
-        # save_velo_path.mkdir(parents=True, exist_ok=True)
-
-    # TODO total frame number for GT length
-    ##### TMP
-    vis_num = dataset.iter_len 
-    # vis_num = dataset.iter_len if all_iter else vis_num
-
-    pbar = tqdm(range(vis_num)) 
+    pbar = tqdm(range(vis_num))
     pbar.set_description('visualize')
-    # https://stackoverflow.com/questions/1409886/help-maximum-number-of-clients-reached-segmentation-fault
-    # vi = build_viewer(offscreen=offscreen) # MJ inside for loop -> max client
     for idx in pbar:
+        vi = build_viewer(offscreen=offscreen)
+
         data = dataset[idx]
         points = data['points']
-
-        # MJ
-        save_frame_id = dataset.frame_id # frame number extract
-        print("save frame id {}".format(save_frame_id))
-        
-
-        open_numbers = [3315, 3318, 3320, 3331, 3336, 3373, 3396, 3406, 3407, 3408]
-        # open_numbers = [3320]
-        # Convert to 6-digit strings
-        opensetsix_digit_strings = [str(num).zfill(6) for num in open_numbers]
-        if save_frame_id not in opensetsix_digit_strings:
-            continue
-
-        vi = build_viewer(offscreen=offscreen) #### TMP
 
 
         vi.add_points(points[:,0:3],
@@ -86,10 +58,9 @@ def kitti_visualization(dataset: SceneDataset, class_list, vis_num, thres = None
                 thres_mask = [float(i.split(':')[1]) > thres for i in box_info]
                 boxes = boxes[thres_mask]
                 box_info = box_info[thres_mask]
-
             # add pred_boxes
             vi.add_3D_boxes(boxes=boxes[:,0:7],
-                            # box_info=box_info, # no name
+                            box_info=box_info,
                             color="green",
                             mesh_alpha = 0.1,  # 表面透明度
                             show_corner_spheres = True,    # 是否展示顶点上的球
@@ -108,7 +79,7 @@ def kitti_visualization(dataset: SceneDataset, class_list, vis_num, thres = None
             # add gt_boxes
             vi.add_3D_boxes(gt_boxes,
                             color='red',
-                            # box_info=gt_name, # MJ no name
+                            box_info=gt_name,
                             caption_size=(0.1,0.1),
                             is_label=True
                             )
@@ -130,22 +101,11 @@ def kitti_visualization(dataset: SceneDataset, class_list, vis_num, thres = None
 
             image = data['image']
             vi.add_image(image)
-        """
+
         save_name = save_img_path / f'{idx:0>4d}.png' if save_path is not None else None
         vi.show_2D(save_name=save_name)
         save_name = save_velo_path / f'{idx:0>4d}.png' if save_path is not None else None
         vi.show_3D(save_name=save_name)
-        """
-
-
-
-        if save_frame_id is not None:
-        # if save_frame_id is not None and save_frame_id in opensetsix_digit_strings:
-            save_name = os.path.join(save_img_path,f'{save_frame_id}.png')  if save_path is not None else None
-            vi.show_2D(save_name=save_name) # MJ
-            save_name = os.path.join(save_velo_path,f'{save_frame_id}.png') if save_path is not None else None
-            vi.show_3D(save_name=save_name)
-
     if offscreen:
         print(f'visualization results are saved to: {save_path}')
 
@@ -183,77 +143,36 @@ def seg_vis(velo_root: Path, results, save_path: Path=None):
     if offscreen:
         print(f'visualization results are saved to: {save_path}')
 
-"""
-if __name__ == "__main__":
-    vi = build_viewer()
-    i= 0
-    pseudo_points = np.random.randn(100, 3) # your points
-    pseudo_boxes = np.array([[i*0.05, -1, 1, 1, 1, 1, 0], [i*0.05, 1, 1, 1, 1, 1, 0]]) # your boxes
-
-    vi.add_points(pseudo_points)   # (N, 3), (x, y, z)
-    vi.add_3D_boxes(pseudo_boxes)  # (N, 7), (x, y, z, w, h, l, theta)
-    vi.show_3D()
-"""
+        
 
 if __name__ == '__main__':
     # kitti scene script
 
     data_root = Path('data_root')
-    ALL_ITER = True # True -> auto saving in output folder
-    VAL_DATA = False # False -> test data
+    result_file = Path('result.pkl')
+    gt_info_file = Path('kitti_infos_val.pkl')
+    dataset = SceneDataset(data_root, result_file, gt_info_file)
+    # for i in range(2):
+    #     print_dict(dataset.pred_list[i], content=True)
 
-    # ----------------------
-    # SECOND Family
-    # method = "second"
-    method = "CLOCs"
-
-    # ----------------------
-    # OpenPCDet Family
-    # method="voxel_rcnn"
-    # method = "focal_conv_f"
-    # method = "pointpainting"
-    # method = "pointpillars"
-    # method = "pv_rcnn"
-    # method = "pointrcnn"
-    # ----------------------
-
-    methods = [
-            "second",
-            "CLOCs", 
-            "voxel_rcnn", 
-            "focal_conv_f", 
-            "pointpainting", 
-            "pointpillars", 
-            "pv_rcnn", 
-            "pointrcnn"
-               ]
+    class_list = ['Car', 'Pedestrian', 'Cyclist']
+    kitti_visualization(dataset, 
+                  class_list,
+                  vis_num=5, 
+                  thres = 0.7)
     
 
-    for method in methods:
+    # segmentation script
 
-        # output_folder = os.path.join("output", method) if ALL_ITER else None
-        output_folder = os.path.join("output_final_test", method) if ALL_ITER else None
-        if output_folder is not None:
-            output_folder = os.path.join(output_folder, "val-data") if VAL_DATA else os.path.join(output_folder, "test-data")
-        # ----------------------
-        result_folder = os.path.join("result_folder", method)
-        result_folder = os.path.join(result_folder, "val-data") if VAL_DATA else os.path.join(result_folder, "test-data")
-        result_file = Path(os.path.join(result_folder, 'result.pkl'))
-        gt_info_file = Path(os.path.join(result_folder, 'kitti_infos_val.pkl'))
+    # velo_root = Path('./data/velodyne')
+    # save_path = Path('./data/ouput')
+    # pred_list = SceneDataset.get_pickle('seg_result.pkl')
+
+    # seg_vis(velo_root, pred_list)
 
 
-        # different argument pass for __getitem__ definition
-        if method  == "second" or method == "CLOCs":
-            dataset = SceneDataset(data_root, result_file, gt_info_file, second_format=True)
-        else:
-            dataset = SceneDataset(data_root, result_file, gt_info_file)
+    # concat script
 
-
-        # class_list = ['Car', 'Pedestrian', 'Cyclist'] 
-        # class_list = ['Car']
-        class_list = ['ship'] # for gt_name to appear at drawing MJ
-        kitti_visualization(dataset, 
-                    class_list,
-                    vis_num=100, 
-                    thres = 0.2, save_path=output_folder, all_iter=ALL_ITER)
-
+    # merge_data_root = Path('./data/output')
+    # concat(merge_data_root)
+    

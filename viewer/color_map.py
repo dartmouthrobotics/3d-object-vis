@@ -21,7 +21,8 @@ def generate_objects_color_map(color_map_name='rainbow'):
     cmp = plt.get_cmap(color_map_name)
     color_map = cmp(color_map)
     color_map = color_map[:, 0:3] * 255
-    color_map = color_map.astype(np.int).tolist()
+    # color_map = color_map.astype(np.int).tolist()
+    color_map = color_map.astype(np.int_).tolist() # MJ
     return color_map
 
 def generate_objects_colors(object_ids,color_map_list):
@@ -64,7 +65,8 @@ def generate_scatter_colors(scatters,color_map_name='rainbow'):
         new_colors = new_colors[:, 0:3] * 255
         alpha = np.ones(shape=(len(new_colors), 1)) * 255
         new_colors = np.concatenate([new_colors, alpha], -1)
-    return new_colors.astype(np.int)
+    # return new_colors.astype(np.int)
+    return new_colors.astype(np.int_) # MJ
 
 
 if __name__ == '__main__':

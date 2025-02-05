@@ -407,7 +407,9 @@ class Viewer:
 
         # self.vi.show(self.actors+self.actors_without_del,resetcam=False)
         self.vi.show(self.actors+self.actors_without_del,
-                    camera=dict(pos=[0,0,150], viewup=[0, 1, 0], focalPoint=[0, 0, 0], viewAngle=45))
+                    # camera=dict(pos=[0,0,150], viewup=[0, 1, 0], focalPoint=[0, 0, 0], viewAngle=45)
+                    camera=dict(pos=[20,0,110], viewup=[0, 1, 0], focalPoint=[0, 0, 0], viewAngle=60)
+                    )
                     # camera shooting direction is default set to x axis
                     # viewup should be perpendicular to the shooting direction
                     # focal point is normally set to a point along shooting direction
@@ -427,6 +429,9 @@ class Viewer:
         :param show_ids: (tuple(3,),default points color
         :return:
         """
+
+        # cv2.imshow("im", self.image)
+        # cv2.waitKey()
 
         if (self.cam_extrinsic_mat is None) or (self.cam_intrinsic_mat is None) or (self.image is None):
             return
@@ -462,6 +467,11 @@ class Viewer:
 
                     x = x.astype(np.int)
                     y = y.astype(np.int)
+
+                    # MJ
+                    # print("image check {}".format(self.image.flags)) # MJ
+                    # self.image.setflags(write=1)
+                    self.image = self.image.copy()
 
                     self.image[y, x] = color
 
@@ -509,11 +519,14 @@ class Viewer:
 
             self.image[y, x] = color
 
+        # try (MJ)
+        # self.image  = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
+
         if save_name is None:
             cv2.imshow('im',self.image)
-            cv2.waitKey(10)
+            cv2.waitKey()
         else:
-            cv2.imwrite(save_name, self.image * 255)
+            cv2.imwrite(save_name, self.image)
         self.points_info.clear()
         self.boxes_info.clear()
 
