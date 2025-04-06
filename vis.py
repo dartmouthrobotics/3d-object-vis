@@ -225,14 +225,16 @@ if __name__ == '__main__':
             "pointpainting", 
             "pointpillars", 
             "pv_rcnn", 
-            "pointrcnn"
+            "pointrcnn",
+            "TED",
+            "TED_M"
                ]
     
 
     for method in methods:
 
         # output_folder = os.path.join("output", method) if ALL_ITER else None
-        output_folder = os.path.join("output_final_test", method) if ALL_ITER else None
+        output_folder = os.path.join("output_final_test_revision_20250405", method) if ALL_ITER else None
         if output_folder is not None:
             output_folder = os.path.join(output_folder, "val-data") if VAL_DATA else os.path.join(output_folder, "test-data")
         # ----------------------

@@ -57,3 +57,9 @@ I've made some demo videos to show the results:
 1. [3D Object Detection Visualization Demo](https://www.bilibili.com/video/BV1h3411t7sc)
 2. [3D Object Segmentation (Car) Demo](https://www.bilibili.com/video/BV1oT4y1f71D)
 
+
+
+## MJ note
+* result.pkl: eval result from OpenPCD. Each model seperately 
+* run: python vis.py
+  * ouput folder change
